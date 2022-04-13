@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { userContext } from "../../App";
 
 import { Link } from "react-router-dom";
 import "./feed.css";
-
-import Feed from "./Feed";
 
 import pic from "./user.png";
 
 const Shop = ({ datas }) => {
   const [com, setCom] = useState("");
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   const likePost = async (id) => {
@@ -68,10 +66,57 @@ const Shop = ({ datas }) => {
 
   const handleChange = (e) => {
     setCom(e.target.value);
-    
   };
- // console.log(com)
-   
+  // console.log(com)
+
+  const makeComment = async (text, postId) => {
+    try {
+      const url = "http://localhost:5000/comment";
+      const head = "12 " + localStorage.getItem("token");
+      const res = await axios.put(
+        url,
+        { postId, text },
+        {
+          headers: {
+            tokn: head,
+          },
+        }
+      );
+      console.log(res);
+      window.location.reload();
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        console.log(error);
+      }
+    }
+  };
+
+  const deletePost = async (postId) => {
+    try {
+      const url = `http://localhost:5000/deletepost/${postId}`;
+      const head = "12 " + localStorage.getItem("token");
+      const res = await axios.delete(url, {
+        headers: {
+          tokn: head,
+        },
+      });
+     
+      window.location.reload();
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status <= 500
+      ) {
+        console.log(error);
+      }
+    }
+  };
+
   return (
     <div className="feed">
       <div className="feedWrapper">
@@ -95,8 +140,18 @@ const Shop = ({ datas }) => {
                   }}
                 >
                   {datas.postedBy.firstname}
+                  {datas.postedBy._id===user._id&& <i
+                class="fa fa-trash-o"
+                style={{
+                  float: "right",
+                  marginTop: "18px",
+                  marginRight: "30px",
+                }}
+                onClick={()=>deletePost(datas._id)}
+              ></i>}
                 </Link>
               </span>
+             
             </h6>
             <img
               class="banner-img img1"
@@ -147,7 +202,19 @@ const Shop = ({ datas }) => {
             >
               {datas.description}
             </p>
-               
+
+            {datas.comments.map((item) => {
+              return (
+                <h6 key={item._id}>
+                  <span style={{ marginLeft: "15px", fontSize: "15px" }}>
+                    {item.postedBy.firstname}
+                  </span>
+                  <span style={{ marginLeft: "15px", fontWeight: "normal" }}>
+                    {item.text}
+                  </span>
+                </h6>
+              );
+            })}
 
             <input
               type="text"
@@ -160,7 +227,7 @@ const Shop = ({ datas }) => {
               id="post"
               onClick={(e) => {
                 e.preventDefault();
-                console.log();
+                makeComment(com, datas._id);
               }}
               style={{
                 border: "none",
