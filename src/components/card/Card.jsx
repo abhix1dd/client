@@ -14,7 +14,7 @@ function Card() {
         </div>
         <div className='lower-container'>
             <h5>{`${user.firstname} ${user.lastname}`}</h5>
-            <h6>Trainee</h6>
+            <h6>Trainee(New Scholar)</h6>
         </div>
 
         <div className="social-container">
